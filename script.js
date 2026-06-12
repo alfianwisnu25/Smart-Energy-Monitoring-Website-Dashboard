@@ -13,6 +13,15 @@ const elCost = document.getElementById('val-cost');
 const elQuality = document.getElementById('val-quality');
 const iconQuality = document.getElementById('icon-quality');
 
+const elEfficiency = document.getElementById('val-efficiency');
+const barEfficiency = document.getElementById('bar-efficiency');
+const elSavings = document.getElementById('val-savings');
+const elPeakLoad = document.getElementById('val-peak-load');
+const elDailyAvg = document.getElementById('val-daily-avg');
+const elEstBill = document.getElementById('val-est-bill');
+
+let peakPower = 0; // Variabel untuk menyimpan rekor daya tertinggi
+
 // --- Logika Menu Sidebar (Navigasi Tab) ---
 const navItems = document.querySelectorAll('.nav-item');
 const viewSections = document.querySelectorAll('.view-section');
@@ -202,6 +211,37 @@ function updateDashboard(data) {
 
     // 6. Update Tabel Riwayat Data
     updateHistoryTable(data, nowTime);
+    // ==========================================
+    // 7. UPDATE STATISTIK LANJUTAN & EFISIENSI
+    // ==========================================
+    
+    // a. Efisiensi diambil dari Power Factor (contoh: PF 0.95 = 95%)
+    let efisiensi = Math.round(data.pf * 100);
+    if (elEfficiency && barEfficiency) {
+        elEfficiency.innerText = efisiensi + "%";
+        barEfficiency.style.width = efisiensi + "%";
+    }
+
+    // b. Total Penghematan (Simulasi: hemat 5% tagihan jika efisiensi kelistrikan >= 90%)
+    let savings = 0;
+    if (efisiensi >= 90) {
+        savings = (data.energy * TARIF_LISTRIK) * 0.05;
+    }
+    if (elSavings) elSavings.innerText = formatRupiah(savings);
+
+    // c. Beban Puncak (Mencatat daya tertinggi selama website dibuka)
+    if (data.power > peakPower) {
+        peakPower = data.power;
+    }
+    if (elPeakLoad) elPeakLoad.innerText = peakPower.toFixed(0) + " W";
+
+    // d. Proyeksi Rata-rata Harian (Daya saat ini x 24 jam)
+    let dailyEst = (data.power * 24) / 1000;
+    if (elDailyAvg) elDailyAvg.innerText = dailyEst.toFixed(1) + " kWh";
+
+    // e. Proyeksi Estimasi Tagihan Bulanan (Proyeksi harian x 30 hari x Tarif)
+    let monthlyEst = dailyEst * 30 * TARIF_LISTRIK;
+    if (elEstBill) elEstBill.innerText = formatRupiah(monthlyEst);
 }
 
 // Fungsi Update Tabel Berdasarkan Data Realtime

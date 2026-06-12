@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Energy Monitoring System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-leaf"></i>
+            <h2>SmartEnergy</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="nav-item active" data-target="view-dashboard"><a href="javascript:void(0)"><i class="fa-solid fa-border-all"></i> Dashboard</a></li>
+            <li class="nav-item" data-target="view-monitoring"><a href="javascript:void(0)"><i class="fa-solid fa-chart-pie"></i> Monitoring</a></li>
+            <li class="nav-item" data-target="view-riwayat"><a href="javascript:void(0)"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Data</a></li>
+            <li class="nav-item" data-target="view-pengaturan"><a href="javascript:void(0)"><i class="fa-solid fa-gear"></i> Pengaturan</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="header-left">
+                <h1>Smart Energy Monitoring System</h1>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span class="dot online" id="mqtt-dot"></span>
+                    <span id="mqtt-status">MQTT Connected</span>
+                </div>
+                <div class="datetime">
+                    <i class="fa-regular fa-calendar"></i>
+                    <span id="realtime-clock">Loading...</span>
+                </div>
+                <button id="dark-mode-toggle" class="btn-icon">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            
+            <div id="view-dashboard" class="view-section active">
+                <section class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon" style="background: #e3f2fd; color: #2196f3;"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="card-info">
+                            <h3>Tegangan</h3>
+                            <p><span id="val-voltage">0</span> <small>V</small></p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: #fce4ec; color: #e91e63;"><i class="fa-solid fa-plug"></i></div>
+                        <div class="card-info">
+                            <h3>Arus</h3>
+                            <p><span id="val-current">0.0</span> <small>A</small></p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: #fff3e0; color: #ff9800;"><i class="fa-solid fa-lightbulb"></i></div>
+                        <div class="card-info">
+                            <h3>Daya</h3>
+                            <p><span id="val-power">0</span> <small>W</small></p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: #f3e5f5; color: #9c27b0;"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="card-info">
+                            <h3>Power Factor</h3>
+                            <p><span id="val-pf">0.00</span></p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: #e8f5e9; color: var(--primary-color);"><i class="fa-solid fa-battery-full"></i></div>
+                        <div class="card-info">
+                            <h3>Energi</h3>
+                            <p><span id="val-energy">0.0</span> <small>kWh</small></p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: #e0f2f1; color: #009688;"><i class="fa-solid fa-money-bill-wave"></i></div>
+                        <div class="card-info">
+                            <h3>Biaya Listrik</h3>
+                            <p id="val-cost">Rp 0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bottom-grid">
+                    <div class="chart-box span-2">
+                        <h3>Penggunaan Energi (Realtime)</h3>
+                        <div class="canvas-container">
+                            <canvas id="energyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-box">
+                        <h3>Distribusi Konsumsi</h3>
+                        <div class="canvas-container">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="status-panel card">
+                        <h3>Panel Status Sistem</h3>
+                        <div class="status-item">
+                            <div class="status-label">
+                                <span>Efisiensi Energi</span>
+                                <span id="val-efficiency">82%</span>
+                            </div>
+                            <div class="progress-bg">
+                                <div class="progress-bar" id="bar-efficiency" style="width: 82%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="status-item split">
+                            <div class="split-info">
+                                <span>Power Quality</span>
+                                <strong id="val-quality" class="text-success">Baik</strong>
+                            </div>
+                            <i class="fa-solid fa-check-circle text-success" id="icon-quality"></i>
+                        </div>
+
+                        <div class="status-item split savings">
+                            <div class="split-info">
+                                <span>Total Penghematan</span>
+                                <strong id="val-savings">Rp 25.000</strong>
+                            </div>
+                            <i class="fa-solid fa-piggy-bank"></i>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-monitoring" class="view-section">
+                <div class="bottom-grid" style="padding-top: 20px;">
+                    <div class="chart-box span-2">
+                        <h3>Konsumsi Energi Harian (7 Hari Terakhir)</h3>
+                        <div class="canvas-container">
+                            <canvas id="weeklyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="status-panel card">
+                        <h3>Statistik Lanjutan</h3>
+                        <div class="status-item split">
+                            <div class="split-info">
+                                <span>Beban Puncak (Bulan Ini)</span>
+                                <strong>1.250 W</strong>
+                            </div>
+                            <i class="fa-solid fa-arrow-trend-up" style="color: #f44336;"></i>
+                        </div>
+                        <div class="status-item split">
+                            <div class="split-info">
+                                <span>Rata-rata Harian</span>
+                                <strong>4.2 kWh</strong>
+                            </div>
+                            <i class="fa-solid fa-chart-line" style="color: var(--primary-color);"></i>
+                        </div>
+                        <div class="status-item split">
+                            <div class="split-info">
+                                <span>Estimasi Tagihan Bulanan</span>
+                                <strong>Rp 181.500</strong>
+                            </div>
+                            <i class="fa-solid fa-wallet" style="color: #ff9800;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-riwayat" class="view-section">
+                <div class="content-padded">
+                    <div class="card table-card">
+                        <div class="table-header">
+                            <div>
+                                <h3>Log Data Sensor</h3>
+                                <p style="font-size: 12px; color: var(--text-muted);">Menampilkan 10 data terakhir dari ESP8266</p>
+                            </div>
+                            <button class="btn-primary" onclick="showNotification('Mendownload file CSV...')">
+                                <i class="fa-solid fa-download"></i> Export CSV
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Tegangan (V)</th>
+                                        <th>Arus (A)</th>
+                                        <th>Daya (W)</th>
+                                        <th>Energi (kWh)</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-tbody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-pengaturan" class="view-section">
+                <div class="settings-grid content-padded">
+                    <div class="card form-card">
+                        <h3><i class="fa-solid fa-sliders"></i> Pengaturan Sistem</h3>
+                        <div class="form-group">
+                            <label>Tarif Dasar Listrik (Rp/kWh)</label>
+                            <input type="number" id="input-tarif" class="form-control" value="1444.70" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Batas Alarm Daya (Watt)</label>
+                            <input type="number" id="input-alarm" class="form-control" value="900">
+                        </div>
+                        <button class="btn-primary w-100" id="btn-save-sys">Simpan Pengaturan</button>
+                    </div>
+
+                    <div class="card form-card">
+                        <h3><i class="fa-solid fa-network-wired"></i> Koneksi MQTT (EMQX)</h3>
+                        <div class="form-group">
+                            <label>Broker URL</label>
+                            <input type="text" class="form-control" value="wss://broker.emqx.io:8084/mqtt">
+                        </div>
+                        <div style="display: flex; gap: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Username</label>
+                                <input type="text" class="form-control" value="admin_iot">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Password</label>
+                                <input type="password" class="form-control" value="********">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Subscribe Topic</label>
+                            <input type="text" class="form-control" value="sensor/pzem004t/data">
+                        </div>
+                        <button class="btn-secondary w-100" onclick="showNotification('Mencoba menghubungkan ulang ke Broker...')">
+                            <i class="fa-solid fa-rotate"></i> Reconnect MQTT
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    
+    <script src="script.js"></script>
+
+</body>
+</html>

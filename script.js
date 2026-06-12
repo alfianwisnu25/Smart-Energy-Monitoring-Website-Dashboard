@@ -1,8 +1,9 @@
-// Variabel Global
+// ==========================================
+// VARIABEL GLOBAL & DOM ELEMENTS
+// ==========================================
 let TARIF_LISTRIK = 1444.70; 
 let BATAS_ALARM = 900; 
 
-// DOM Elements
 const elVoltage = document.getElementById('val-voltage');
 const elCurrent = document.getElementById('val-current');
 const elPower = document.getElementById('val-power');
@@ -48,11 +49,13 @@ darkModeBtn.addEventListener('click', () => {
     }
 });
 
-// Konfigurasi Dasar Chart.js
+// ==========================================
+// INISIALISASI CHART.JS (DATA KOSONG/REAL)
+// ==========================================
 Chart.defaults.color = '#888';
 Chart.defaults.font.family = 'Poppins';
 
-// 1. Line Chart (Dashboard)
+// 1. Line Chart (Dashboard) - Mulai kosong
 const ctxEnergy = document.getElementById('energyChart').getContext('2d');
 const energyChart = new Chart(ctxEnergy, {
     type: 'line',
@@ -76,14 +79,15 @@ const energyChart = new Chart(ctxEnergy, {
     }
 });
 
-// 2. Doughnut Chart (Dashboard)
+// 2. Doughnut Chart (Dashboard) - Dihitung Realtime
+let distDataCount = [0, 0, 0]; // [Ringan, Sedang, Tinggi]
 const ctxDist = document.getElementById('distributionChart').getContext('2d');
 const distributionChart = new Chart(ctxDist, {
     type: 'doughnut',
     data: {
-        labels: ['Beban Ringan', 'Beban Sedang', 'Beban Tinggi'],
+        labels: ['Beban Ringan (<300W)', 'Beban Sedang (300-600W)', 'Beban Tinggi (>600W)'],
         datasets: [{
-            data: [40, 35, 25],
+            data: distDataCount,
             backgroundColor: ['#5BBE8A', '#ff9800', '#f44336'],
             borderWidth: 0
         }]
@@ -96,7 +100,7 @@ const distributionChart = new Chart(ctxDist, {
     }
 });
 
-// 3. Bar Chart (Monitoring - Baru)
+// 3. Bar Chart (Monitoring) - Tanpa Database (0)
 const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
 const weeklyChart = new Chart(ctxWeekly, {
     type: 'bar',
@@ -104,7 +108,7 @@ const weeklyChart = new Chart(ctxWeekly, {
         labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
         datasets: [{
             label: 'Energi (kWh)',
-            data: [3.2, 4.1, 3.8, 5.2, 4.8, 6.1, 5.5],
+            data: [0, 0, 0, 0, 0, 0, 0], // Dikosongkan karena tidak ada database
             backgroundColor: '#5BBE8A',
             borderRadius: 6
         }]
@@ -117,42 +121,9 @@ const weeklyChart = new Chart(ctxWeekly, {
     }
 });
 
-// --- Fitur Tabel Riwayat Data (Baru) ---
-function generateDummyHistory() {
-    const tbody = document.getElementById('history-tbody');
-    tbody.innerHTML = ''; 
-    
-    let time = new Date();
-    let currentEnergy = 12.450;
-
-    for (let i = 0; i < 10; i++) {
-        time.setSeconds(time.getSeconds() - 5);
-        const timeStr = time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second:'2-digit' });
-        
-        const volt = (220 + (Math.random() * 2 - 1)).toFixed(1);
-        const amp = (1.5 + (Math.random() * 0.4)).toFixed(2);
-        const pwr = (volt * amp).toFixed(0);
-        currentEnergy -= 0.001; 
-        
-        let statusBadge = pwr > 500 ? `<span class="badge badge-warning">Tinggi</span>` : `<span class="badge badge-normal">Normal</span>`;
-
-        const row = `
-            <tr>
-                <td>${timeStr}</td>
-                <td>${volt}</td>
-                <td>${amp}</td>
-                <td>${pwr}</td>
-                <td>${currentEnergy.toFixed(3)}</td>
-                <td>${statusBadge}</td>
-            </tr>
-        `;
-        tbody.insertAdjacentHTML('beforeend', row);
-    }
-}
-generateDummyHistory();
-setInterval(generateDummyHistory, 10000); // Update tabel tiap 10 detik
-
-// --- Fitur Pengaturan Sistem (Baru) ---
+// ==========================================
+// FITUR PENGATURAN & NOTIFIKASI
+// ==========================================
 document.getElementById('btn-save-sys').addEventListener('click', () => {
     const tarifInput = document.getElementById('input-tarif').value;
     const alarmInput = document.getElementById('input-alarm').value;
@@ -168,7 +139,6 @@ document.getElementById('btn-save-sys').addEventListener('click', () => {
     showNotification('Pengaturan sistem berhasil disimpan!');
 });
 
-// Format Rupiah & Notifikasi
 const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
 };
@@ -185,16 +155,19 @@ function showNotification(message) {
     }, 4000);
 }
 
-// --- FUNGSI UTAMA UPDATE DATA ---
+// ==========================================
+// FUNGSI UTAMA: UPDATE DATA DARI MQTT
+// ==========================================
 function updateDashboard(data) {
+    // 1. Update Kartu Angka
     elVoltage.innerText = data.voltage.toFixed(1);
     elCurrent.innerText = data.current.toFixed(2);
     elPower.innerText = data.power.toFixed(0);
     elPf.innerText = data.pf.toFixed(2);
-    elEnergy.innerText = data.energy.toFixed(2);
-    
+    elEnergy.innerText = data.energy.toFixed(3);
     elCost.innerText = formatRupiah(data.energy * TARIF_LISTRIK);
 
+    // 2. Update Status Power Quality (PF)
     if (data.pf >= 0.9) {
         elQuality.innerText = "Baik"; elQuality.style.color = "#5BBE8A";
         iconQuality.className = "fa-solid fa-check-circle"; iconQuality.style.color = "#5BBE8A";
@@ -206,30 +179,106 @@ function updateDashboard(data) {
         iconQuality.className = "fa-solid fa-times-circle"; iconQuality.style.color = "#f44336";
     }
 
+    // 3. Cek Batas Alarm Daya
     if (data.power > BATAS_ALARM) {
         showNotification(`Peringatan: Daya melonjak ke ${data.power.toFixed(0)} W!`);
     }
 
+    // 4. Update Line Chart (Realtime)
     const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second:'2-digit' });
     energyChart.data.labels.push(nowTime);
     energyChart.data.datasets[0].data.push(data.power);
-
     if (energyChart.data.labels.length > 10) {
         energyChart.data.labels.shift();
         energyChart.data.datasets[0].data.shift();
     }
     energyChart.update();
+
+    // 5. Update Doughnut Chart (Distribusi Beban)
+    if (data.power < 300) distDataCount[0]++;
+    else if (data.power <= 600) distDataCount[1]++;
+    else distDataCount[2]++;
+    distributionChart.update();
+
+    // 6. Update Tabel Riwayat Data
+    updateHistoryTable(data, nowTime);
 }
 
-// Simulasi Data Masuk (Bisa diganti koneksi MQTT nanti)
-let dummyEnergyAccumulator = 12.5;
-setInterval(() => {
-    const simulatedData = {
-        voltage: 220 + (Math.random() * 4 - 2),
-        current: 1.5 + (Math.random() * 0.5 - 0.2),
-        power: 330 + (Math.random() * 650),
-        pf: 0.95 - (Math.random() * 0.1),
-        energy: dummyEnergyAccumulator += 0.001
-    };
-    updateDashboard(simulatedData);
-}, 5000);
+// Fungsi Update Tabel Berdasarkan Data Realtime
+function updateHistoryTable(data, timeStr) {
+    const tbody = document.getElementById('history-tbody');
+    
+    // Tentukan badge status berdasarkan daya
+    let statusBadge = data.power > BATAS_ALARM ? 
+        `<span style="background:#f44336; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px;">Tinggi</span>` : 
+        `<span style="background:#5BBE8A; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px;">Normal</span>`;
+
+    // Buat baris baru
+    const row = `
+        <tr>
+            <td>${timeStr}</td>
+            <td>${data.voltage.toFixed(1)}</td>
+            <td>${data.current.toFixed(2)}</td>
+            <td>${data.power.toFixed(0)}</td>
+            <td>${data.energy.toFixed(3)}</td>
+            <td>${statusBadge}</td>
+        </tr>
+    `;
+    
+    // Masukkan baris baru di posisi paling atas
+    tbody.insertAdjacentHTML('afterbegin', row);
+
+    // Hapus baris paling bawah jika lebih dari 10 baris
+    if (tbody.children.length > 10) {
+        tbody.removeChild(tbody.lastChild);
+    }
+}
+
+// ==========================================
+// KONEKSI MQTT KE EMQX CLOUD (WEBSOCKETS)
+// ==========================================
+const mqttHost = 'wss://p5161151.ala.asia-southeast1.emqxsl.com:8084/mqtt';
+const mqttOptions = {
+    clientId: 'WebDashboard_' + Math.random().toString(16).substring(2, 8),
+    username: 'admin', 
+    password: 'admin', 
+    clean: true,
+    reconnectPeriod: 2000,
+};
+
+const mqttStatusText = document.getElementById('mqtt-status');
+const mqttDot = document.getElementById('mqtt-dot');
+
+console.log("Mencoba terhubung ke Broker MQTT...");
+const client = mqtt.connect(mqttHost, mqttOptions);
+
+client.on('connect', () => {
+    console.log('Berhasil terhubung ke EMQX Cloud via WebSocket!');
+    mqttStatusText.innerText = 'MQTT Connected';
+    mqttDot.style.backgroundColor = 'var(--primary-color)';
+    mqttDot.style.boxShadow = '0 0 8px var(--primary-color)';
+
+    client.subscribe('sensor/pzem004t/data', { qos: 0 });
+});
+
+client.on('message', (topic, message) => {
+    try {
+        const dataPzem = JSON.parse(message.toString());
+        updateDashboard(dataPzem); 
+    } catch (e) {
+        console.error("Format JSON tidak valid!", e);
+    }
+});
+
+client.on('error', (err) => {
+    console.error('Koneksi MQTT Gagal: ', err);
+    mqttStatusText.innerText = 'MQTT Error';
+    mqttDot.style.backgroundColor = '#f44336';
+    mqttDot.style.boxShadow = '0 0 8px #f44336';
+});
+
+client.on('offline', () => {
+    mqttStatusText.innerText = 'MQTT Disconnected';
+    mqttDot.style.backgroundColor = '#888';
+    mqttDot.style.boxShadow = 'none';
+});

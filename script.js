@@ -322,3 +322,42 @@ client.on('offline', () => {
     mqttDot.style.backgroundColor = '#888';
     mqttDot.style.boxShadow = 'none';
 });
+
+// ==========================================
+// KONTROL RELAY (KIRIM PERINTAH KE ESP8266)
+// ==========================================
+const btnRelay = document.getElementById('btn-relay');
+const valRelayStatus = document.getElementById('val-relay-status');
+let isRelayOn = false; // Status awal default OFF
+
+if(btnRelay) {
+    btnRelay.addEventListener('click', () => {
+        // Balikkan statusnya
+        isRelayOn = !isRelayOn;
+        const payload = isRelayOn ? "ON" : "OFF";
+
+        // Pastikan MQTT terhubung sebelum mengirim perintah
+        if (client.connected) {
+            // Kirim pesan "ON" atau "OFF" ke topik kontrol
+            client.publish('sensor/pzem004t/control', payload, { qos: 0 });
+            
+            // Ubah tampilan tombol di Dashboard
+            if(isRelayOn) {
+                btnRelay.innerText = "Turn OFF";
+                btnRelay.style.backgroundColor = "#f44336"; // Merah
+                valRelayStatus.innerText = "ON";
+                valRelayStatus.style.color = "#5BBE8A"; // Hijau
+                showNotification("Mencoba menyalakan beban listrik...");
+            } else {
+                btnRelay.innerText = "Turn ON";
+                btnRelay.style.backgroundColor = "#5BBE8A"; // Hijau
+                valRelayStatus.innerText = "OFF";
+                valRelayStatus.style.color = "#f44336"; // Merah
+                showNotification("Mencoba mematikan beban listrik...");
+            }
+        } else {
+            showNotification("Gagal: Menunggu koneksi MQTT!");
+            isRelayOn = !isRelayOn; // Kembalikan status jika gagal
+        }
+    });
+}

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Energy Monitoring System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -108,30 +108,39 @@
 
                     <div class="status-panel card">
                         <h3>Panel Status Sistem</h3>
-                        <div class="status-item">
-                            <div class="status-label">
-                                <span>Efisiensi Energi</span>
-                                <span id="val-efficiency">82%</span>
+                        
+                        <div class="status-item split" style="display: flex; justify-content: space-between; align-items: center; background-color: #f4f6f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e0e0e0;">
+                            <div class="split-info">
+                                <span style="font-weight: 600; display: block; margin-bottom: 4px;">Kontrol Beban (Relay)</span>
+                                <strong id="val-relay-status" style="color: #f44336; font-size: 18px;">OFF</strong>
                             </div>
-                            <div class="progress-bg">
-                                <div class="progress-bar" id="bar-efficiency" style="width: 82%;"></div>
+                            <button id="btn-relay" class="btn-primary" style="background-color: #5BBE8A; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; color: white;">Turn ON</button>
+                        </div>
+
+                        <div class="status-item" style="margin-bottom: 20px;">
+                            <div class="status-label" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-weight: 500;">Efisiensi Energi</span>
+                                <span id="val-efficiency" style="font-weight: bold;">82%</span>
+                            </div>
+                            <div class="progress-bg" style="background: #eee; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div class="progress-bar" id="bar-efficiency" style="width: 82%; background: #5BBE8A; height: 100%; transition: 0.4s;"></div>
                             </div>
                         </div>
                         
-                        <div class="status-item split">
+                        <div class="status-item split" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
                             <div class="split-info">
-                                <span>Power Quality</span>
-                                <strong id="val-quality" class="text-success">Baik</strong>
+                                <span style="display: block; font-size: 14px; color: var(--text-muted);">Power Quality</span>
+                                <strong id="val-quality" style="color: #5BBE8A;">Baik</strong>
                             </div>
-                            <i class="fa-solid fa-check-circle text-success" id="icon-quality"></i>
+                            <i class="fa-solid fa-check-circle" id="icon-quality" style="color: #5BBE8A; font-size: 24px;"></i>
                         </div>
 
-                        <div class="status-item split savings">
+                        <div class="status-item split savings" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #e8f5e9; border-radius: 8px; border: 1px solid #5BBE8A;">
                             <div class="split-info">
-                                <span>Total Penghematan</span>
-                                <strong id="val-savings">Rp 25.000</strong>
+                                <span style="display: block; font-size: 14px; color: #2e7d32; font-weight: 500;">Total Penghematan</span>
+                                <strong id="val-savings" style="color: #2e7d32; font-size: 18px;">Rp 25.000</strong>
                             </div>
-                            <i class="fa-solid fa-piggy-bank"></i>
+                            <i class="fa-solid fa-piggy-bank" style="color: #5BBE8A; font-size: 24px;"></i>
                         </div>
                     </div>
                 </section>
@@ -146,28 +155,43 @@
                         </div>
                     </div>
 
-                
-                        <div class="status-panel card">
-                            <h3>Statistik Lanjutan</h3>
-                            <div class="status-item split">
-                                <div class="split-info">
-                                    <span>Beban Puncak (Bulan Ini)</span>
-                                    <strong id="val-peak-load">0 W</strong> </div>
-                                <i class="fa-solid fa-arrow-trend-up" style="color: #f44336;"></i>
+                    <div class="status-panel card">
+                        <h3>Panel Status Sistem</h3>
+                        
+                        <div class="status-item split" style="display: flex; justify-content: space-between; align-items: center; background-color: #f4f6f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e0e0e0;">
+                            <div class="split-info">
+                                <span style="font-weight: 600; display: block; margin-bottom: 4px;">Kontrol Beban (Relay)</span>
+                                <strong id="val-relay-status" style="color: #f44336; font-size: 18px;">OFF</strong>
                             </div>
-                            <div class="status-item split">
-                                <div class="split-info">
-                                    <span>Rata-rata Harian</span>
-                                    <strong id="val-daily-avg">0.0 kWh</strong> </div>
-                                <i class="fa-solid fa-chart-line" style="color: var(--primary-color);"></i>
+                            <button id="btn-relay" class="btn-primary" style="background-color: #5BBE8A; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; color: white;">Turn ON</button>
+                        </div>
+                    
+                        <div class="status-item" style="margin-bottom: 20px;">
+                            <div class="status-label" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-weight: 500;">Efisiensi Energi</span>
+                                <span id="val-efficiency" style="font-weight: bold;">82%</span>
                             </div>
-                            <div class="status-item split">
-                                <div class="split-info">
-                                    <span>Estimasi Tagihan Bulanan</span>
-                                    <strong id="val-est-bill">Rp 0</strong> </div>
-                                <i class="fa-solid fa-wallet" style="color: #ff9800;"></i>
+                            <div class="progress-bg" style="background: #eee; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div class="progress-bar" id="bar-efficiency" style="width: 82%; background: #5BBE8A; height: 100%; transition: 0.4s;"></div>
                             </div>
                         </div>
+                        
+                        <div class="status-item split" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div class="split-info">
+                                <span style="display: block; font-size: 14px; color: var(--text-muted);">Power Quality</span>
+                                <strong id="val-quality" style="color: #5BBE8A;">Baik</strong>
+                            </div>
+                            <i class="fa-solid fa-check-circle" id="icon-quality" style="color: #5BBE8A; font-size: 24px;"></i>
+                        </div>
+                    
+                        <div class="status-item split savings" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #e8f5e9; border-radius: 8px; border: 1px solid #5BBE8A;">
+                            <div class="split-info">
+                                <span style="display: block; font-size: 14px; color: #2e7d32; font-weight: 500;">Total Penghematan</span>
+                                <strong id="val-savings" style="color: #2e7d32; font-size: 18px;">Rp 25.000</strong>
+                            </div>
+                            <i class="fa-solid fa-piggy-bank" style="color: #5BBE8A; font-size: 24px;"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -195,8 +219,7 @@
                                         <th>Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="history-tbody">
-                                    </tbody>
+                                <tbody id="history-tbody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -251,10 +274,7 @@
     <div id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    
     <script src="script.js"></script>
-
 </body>
 </html>
